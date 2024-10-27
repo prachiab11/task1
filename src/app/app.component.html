@@ -1,4 +1,49 @@
-<div>
-    <pre>{{ hierarchicalData | json }}</pre>
+<!-- <div>
+  <pre>{{ hierarchicalData | json }}</pre>
+</div> -->
+
+<div class="dropdown-container">
+  <div class="transparent-form">
+    <h2>Form To Update A Address</h2>
+  <div>
+    <mat-form-field appearance="fill">
+      <mat-label>Country</mat-label>
+      <mat-select (selectionChange)="onCountryChange($event.value)">
+        <mat-option *ngFor="let country of countries" [value]="country.id">
+          {{ country.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
-  
+  <div>
+    <mat-form-field appearance="fill" *ngIf="states.length > 0">
+      <mat-label>State</mat-label>
+      <mat-select (selectionChange)="onStateChange($event.value)">
+        <mat-option *ngFor="let state of states" [value]="state.id">
+          {{ state.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div>
+
+    <mat-form-field appearance="fill" *ngIf="districts.length > 0">
+      <mat-label>District</mat-label>
+      <mat-select (selectionChange)="onDistrictChange($event.value)">
+        <mat-option *ngFor="let district of districts" [value]="district.id">
+          {{ district.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field appearance="fill" *ngIf="places.length > 0">
+      <mat-label>Place</mat-label>
+      <mat-select>
+        <mat-option *ngFor="let place of places" [value]="place.id">
+          {{ place.name }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>

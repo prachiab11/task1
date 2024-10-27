@@ -5,11 +5,17 @@ import { Component, OnInit } from '@angular/core';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   hierarchicalData: any;
+  countries: any[] = [];
+  states: any[] = [];
+  districts: any[] = [];
+  places: any[] = [];
+
+  selectedCountryId: string | null = null;
+  selectedStateId: string | null = null;
 
   ngOnInit() {
-   
     const firstLevelArr = [
       { id: "1", name: "India" },
       { id: "2", name: "Germany" }
@@ -52,44 +58,87 @@ export class AppComponent implements OnInit{
       { id: "p16", parentId: "d8", name: "Old Chennai" }
     ];
 
-   
-    function buildHierarchy(firstArr: any[], secondArr: any[], thirdArr: any[], fourthArr: any[]) {
-      const result: any = { countries: {} };
+    this.hierarchicalData = this.buildHierarchy(firstLevelArr, secondLevelArr, thirdLevelArr, fourthLevelArr);
+    this.countries = Object.keys(this.hierarchicalData.countries).map(id => ({
+      id,
+      name: this.hierarchicalData.countries[id].countryName
+    }));
+  }
 
-      firstArr.forEach(country => {
-        result.countries[country.id] = { countryName: country.name, states: {} };
-      });
+  onCountryChange(countryId: string) {
+    this.selectedCountryId = countryId;
+    this.states = Object.keys(this.hierarchicalData.countries[countryId].states).map(id => ({
+      id,
+      name: this.hierarchicalData.countries[countryId].states[id].stateName
+    }));
+    this.districts = [];
+    this.places = [];
+    this.selectedStateId = null; // Reset state and districts
+  }
 
-      secondArr.forEach(state => {
-        if (result.countries[state.parentId]) {
-          result.countries[state.parentId].states[state.id] = { stateName: state.name, districts: {} };
-        }
-      });
-
-      thirdArr.forEach(district => {
-        for (let countryId in result.countries) {
-          const country = result.countries[countryId];
-          if (country.states[district.parentId]) {
-            country.states[district.parentId].districts[district.id] = { districtName: district.name, places: {} };
-          }
-        }
-      });
-
-      fourthArr.forEach(place => {
-        for (let countryId in result.countries) {
-          const country = result.countries[countryId];
-          for (let stateId in country.states) {
-            const state = country.states[stateId];
-            if (state.districts[place.parentId]) {
-              state.districts[place.parentId].places[place.id] = { placeName: place.name };
-            }
-          }
-        }
-      });
-
-      return result;
+  onStateChange(stateId: string) {
+    this.selectedStateId = stateId;
+    if (this.selectedCountryId) {
+      const country = this.hierarchicalData.countries[this.selectedCountryId];
+      if (country && country.states[stateId]) {
+        this.districts = Object.keys(country.states[stateId].districts).map(id => ({
+          id,
+          name: country.states[stateId].districts[id].districtName
+        }));
+        this.places = [];
+      }
     }
+  }
 
-    this.hierarchicalData = buildHierarchy(firstLevelArr, secondLevelArr, thirdLevelArr, fourthLevelArr);
+  onDistrictChange(districtId: string) {
+    if (this.selectedStateId && this.selectedCountryId) {
+      const country = this.hierarchicalData.countries[this.selectedCountryId];
+      if (country && country.states[this.selectedStateId]) {
+        const state = country.states[this.selectedStateId];
+        if (state && state.districts[districtId]) {
+          this.places = Object.keys(state.districts[districtId].places).map(id => ({
+            id,
+            name: state.districts[districtId].places[id].placeName
+          }));
+        }
+      }
+    }
+  }
+
+  buildHierarchy(firstArr: any[], secondArr: any[], thirdArr: any[], fourthArr: any[]) {
+    const result: any = { countries: {} };
+
+    firstArr.forEach(country => {
+      result.countries[country.id] = { countryName: country.name, states: {} };
+    });
+
+    secondArr.forEach(state => {
+      if (result.countries[state.parentId]) {
+        result.countries[state.parentId].states[state.id] = { stateName: state.name, districts: {} };
+      }
+    });
+
+    thirdArr.forEach(district => {
+      for (let countryId in result.countries) {
+        const country = result.countries[countryId];
+        if (country.states[district.parentId]) {
+          country.states[district.parentId].districts[district.id] = { districtName: district.name, places: {} };
+        }
+      }
+    });
+
+    fourthArr.forEach(place => {
+      for (let countryId in result.countries) {
+        const country = result.countries[countryId];
+        for (let stateId in country.states) {
+          const state = country.states[stateId];
+          if (state.districts[place.parentId]) {
+            state.districts[place.parentId].places[place.id] = { placeName: place.name };
+          }
+        }
+      }
+    });
+    console.log(JSON.stringify(result))
+    return result;
   }
 }
