@@ -73,7 +73,7 @@ export class AppComponent implements OnInit {
     }));
     this.districts = [];
     this.places = [];
-    this.selectedStateId = null; // Reset state and districts
+    this.selectedStateId = null; 
   }
 
   onStateChange(stateId: string) {
